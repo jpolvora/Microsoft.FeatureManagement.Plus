@@ -50,7 +50,7 @@ namespace FeatureManagement.Providers
         }
 
 
-        public void Expire()
+        public void ExpireAllCacheItems()
         {
             this.logger.TriggerTokenCancellation(ref cacheResetTokenSource);
         }

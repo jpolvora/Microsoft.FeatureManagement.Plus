@@ -6,6 +6,6 @@
         /// Expires all cache items.
         /// </summary>
         /// <returns></returns>
-        void Expire();
+        void ExpireAllCacheItems();
     }
 }

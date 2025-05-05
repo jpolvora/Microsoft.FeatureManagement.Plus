@@ -47,7 +47,7 @@ namespace FeatureManagement
                 .AddTransient<DbConnection>(sp => DbConnectionFactory.CreatePersistent("Features"))
                 .AddTransient<FeatureFlagsDbContext>()
                 .AddTransient<FeatureFlagsDbContextAcessor>()
-                .AddTransient<IDbContextAccessor<FeatureFlagsDbContext>, FeatureFlagsDbContextAcessor>(sp => sp.GetRequiredService<FeatureFlagsDbContextAcessor>())
+                .AddTransient<IDbContextAccessor<FeatureFlagsDbContext, FeatureEntity, FeatureTenantEntity>>(sp => sp.GetRequiredService<FeatureFlagsDbContextAcessor>())
                 .AddSingleton<Func<FeatureFlagsDbContextAcessor>>(sp => sp.GetRequiredService<FeatureFlagsDbContextAcessor>)
                 .AddSingleton<FeatureFlagsDbContextFeatureProvider>()
                 .AddSingleton<IFeatureDefinitionProvider>(sp =>
@@ -59,7 +59,8 @@ namespace FeatureManagement
                     var cfgProvider = sp.GetRequiredService<ConfigurationFeatureDefinitionProvider>();
 
                     return new CompositeFeatureDefinitionProvider(new[] { dbProvider, cfgProvider });
-                });
+                })
+                .AddSingleton<CompositeFeatureDefinitionProvider>(sp => (CompositeFeatureDefinitionProvider)sp.GetRequiredService<IFeatureDefinitionProvider>());
 
             var serviceProviderOptions = new ServiceProviderOptions()
             {
@@ -71,26 +72,6 @@ namespace FeatureManagement
 
             return serviceProvider;
 
-        }
-
-
-        public static IServiceCollection AddFactory<TService, TServiceImplementation>(this IServiceCollection serviceCollection)
-            where TService : class
-            where TServiceImplementation : class, TService
-        {
-            return serviceCollection
-                .AddTransient<TService, TServiceImplementation>()
-                .AddSingleton<Func<TService>>(sp => sp.GetRequiredService<TService>);
-        }
-
-        public static IServiceCollection AddFactory<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)
-         where TService : class
-        {
-            var serviceDescriptor = new ServiceDescriptor(typeof(TService), typeof(TService), serviceLifetime);
-            serviceCollection.Add(serviceDescriptor);
-            serviceCollection.AddSingleton<Func<TService>>(sp => sp.GetRequiredService<TService>);
-
-            return serviceCollection;
         }
 
         private static readonly char[] separator = new[] { ',' };
@@ -163,7 +144,7 @@ namespace FeatureManagement
             }
         }
 
-        [Obsolete("This method is obsolete. Use IsEnabledAsync instead.")]
+        //[Obsolete("This method is obsolete. Use IsEnabledAsync instead.")]
         public static bool IsEnabled(this IFeatureManager manager, string feature)
         {
             // This is a workaround to avoid deadlocks when calling async methods from sync context
@@ -201,7 +182,7 @@ namespace FeatureManagement
             }
         }
 
-        public static async Task ResetCache(this FeatureManager manager)
+        public static async Task ResetCache(this FeatureManager featureManager)
         {
             var providers = GlobalServices.GetRequiredService<CompositeFeatureDefinitionProvider>();
             foreach (IFeatureDefinitionProvider provider in providers)
@@ -209,29 +190,30 @@ namespace FeatureManagement
                 await RecursivelyClearCache(provider);
             }
 
-            var filters = manager.FeatureFilters.ToArray();
 
-            foreach (IFeatureFilterMetadata filter in filters)
+            foreach (IFeatureFilterMetadata filter in featureManager.FeatureFilters.ToArray())
             {
                 if (typeof(ICacheManager).IsAssignableFrom(filter.GetType()))
                 {
-                    ((ICacheManager)filter).Expire();
+                    ((ICacheManager)filter).ExpireAllCacheItems();
                 }
             }
         }
 
         private static async Task RecursivelyClearCache(this IFeatureDefinitionProvider provider)
         {
-
-            //inspect if provider is decorated and if so, check the target instance
-            if (provider is IGenericDecorator<IFeatureDefinitionProvider> providerDecorated)
-            {
-                await RecursivelyClearCache(providerDecorated.Target);
-            }
-
             if (typeof(ICacheManager).IsAssignableFrom(provider.GetType()))
             {
-                ((ICacheManager)provider).Expire();
+                ((ICacheManager)provider).ExpireAllCacheItems();
+            }
+
+            if (typeof(IGenericDecorator<IFeatureDefinitionProvider>).IsAssignableFrom(provider.GetType()))
+            {
+                var providerDecorated = provider as IGenericDecorator<IFeatureDefinitionProvider>;
+                if (providerDecorated != null)
+                {
+                    await RecursivelyClearCache(providerDecorated.Target);
+                }
             }
         }
 

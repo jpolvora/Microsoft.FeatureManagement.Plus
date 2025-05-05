@@ -3,7 +3,7 @@ using System.Data.Entity;
 
 namespace FeatureManagement.Providers.DbContextFeatureProvider.Impl
 {
-    public class FeatureFlagsDbContext : DbContext, IFeatureFlagsDbContext
+    public class FeatureFlagsDbContext : DbContext, IFeatureFlagsDbContext<FeatureEntity, FeatureTenantEntity>
     {
         public FeatureFlagsDbContext(DbConnection connection) : base(connection, false)
         {

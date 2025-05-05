@@ -5,7 +5,10 @@ using FeatureManagement.Providers.DbContextFeatureProvider.Impl;
 
 namespace FeatureManagement.Providers.DbContextFeatureProvider
 {
-    public class DbContextAccessor<TContext> : IDbContextAccessor<TContext> where TContext : DbContext, IFeatureFlagsDbContext
+    public class DbContextAccessor<TContext, TFeature, TFeatureTenant> : IDbContextAccessor<TContext, TFeature, TFeatureTenant>
+        where TContext : DbContext, IFeatureFlagsDbContext<TFeature, TFeatureTenant>
+        where TFeature : class, IFeatureEntity
+        where TFeatureTenant : class, IFeatureTenantEntity
     {
         protected readonly TContext _context;
         private bool disposedValue;
@@ -15,12 +18,12 @@ namespace FeatureManagement.Providers.DbContextFeatureProvider
             _context = context;
         }
 
-        public IQueryable<IFeatureEntity> GetFeaturesQuery()
+        public IQueryable<TFeature> GetFeaturesQuery()
         {
             return _context.Features.AsNoTracking().AsQueryable();
         }
 
-        public IQueryable<IFeatureTenantEntity> GetFeaturesTenantsQuery()
+        public IQueryable<TFeatureTenant> GetFeaturesTenantsQuery()
         {
             return _context.FeaturesTenants.AsNoTracking().AsQueryable();
         }

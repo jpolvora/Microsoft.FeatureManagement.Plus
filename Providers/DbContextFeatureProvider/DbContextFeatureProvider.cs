@@ -10,9 +10,12 @@ using Microsoft.FeatureManagement;
 
 namespace FeatureManagement.Providers.DbContextFeatureProvider
 {
-    public abstract class DbContextFeatureProvider<TContext, TAcessor> : IFeatureDefinitionProvider
-            where TContext : DbContext, IFeatureFlagsDbContext
-            where TAcessor : IDbContextAccessor<TContext>
+
+    public abstract class DbContextFeatureProvider<TContext, TAcessor, TFeature, TFeatureTenant> : IFeatureDefinitionProvider
+            where TContext : DbContext, IFeatureFlagsDbContext<TFeature, TFeatureTenant>
+            where TAcessor : class, IDbContextAccessor<TContext, TFeature, TFeatureTenant>
+            where TFeature : class, IFeatureEntity
+            where TFeatureTenant : class, IFeatureTenantEntity
     {
 
         private readonly Func<TAcessor> dbContextAccessor;
@@ -36,7 +39,7 @@ namespace FeatureManagement.Providers.DbContextFeatureProvider
             {
                 using (var context = dbContextAccessor())
                 {
-                    List<IFeatureEntity> features = await context.GetFeaturesQuery()
+                    List<TFeature> features = await context.GetFeaturesQuery()
                                       .OrderBy(x => x.Id)
                                       .ToListAsync()
                                       .ConfigureAwait(false);
@@ -61,7 +64,7 @@ namespace FeatureManagement.Providers.DbContextFeatureProvider
                 using (var context = dbContextAccessor())
                 {
 
-                    IFeatureEntity feature = await context.GetFeaturesQuery()
+                    TFeature feature = await context.GetFeaturesQuery()
                                       .FirstOrDefaultAsync(f => f.Id == featureName)
                                       .ConfigureAwait(false);
 

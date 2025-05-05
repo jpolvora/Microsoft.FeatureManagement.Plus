@@ -2,9 +2,11 @@
 
 namespace FeatureManagement.Providers.DbContextFeatureProvider.Impl
 {
-    public interface IFeatureFlagsDbContext
+    public interface IFeatureFlagsDbContext<TFeature, TFeatureTenant>
+        where TFeature : class, IFeatureEntity
+        where TFeatureTenant : class, IFeatureTenantEntity
     {
-        DbSet<FeatureEntity> Features { get; set; }
-        DbSet<FeatureTenantEntity> FeaturesTenants { get; set; }
+        DbSet<TFeature> Features { get; set; }
+        DbSet<TFeatureTenant> FeaturesTenants { get; set; }
     }
 }
