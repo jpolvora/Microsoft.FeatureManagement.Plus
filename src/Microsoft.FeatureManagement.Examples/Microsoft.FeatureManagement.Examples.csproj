@@ -20,12 +20,8 @@
     <IsPublishable>False</IsPublishable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="Microsoft.FeatureManagement" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.FeatureManagement.Plus\Microsoft.FeatureManagement.Plus.csproj" />
+    <PackageReference Include="Microsoft.FeatureManagement.Plus" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">
