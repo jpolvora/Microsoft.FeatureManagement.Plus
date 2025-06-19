@@ -6,15 +6,15 @@ on:
       projectPath:
         description: '.NET project to build. Passed from the caller workflow'
         required: true
-        default: '*'
+        default: '/src/Microsoft.FeatureManagement.Plus/Microsoft.FeatureManagement.Plus.csproj'
       packagesToken:
         description: 'Personal access token with permissions: (delete:packages, repo, write:packages). Passed from the caller workflow'
         required: true
-        default: '*'
+        default: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       githubToken:
         description: 'use github token'
         required: true
-        default: '*'
+        default: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build-and-publish:
@@ -33,7 +33,7 @@ jobs:
             5.0.x
             8.0.x
         env:
-          NUGET_AUTH_TOKEN: ${{ github.event.inputs.githubToken }}
+          NUGET_AUTH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Restore dependencies
         run: dotnet restore ${{ github.event.inputs.projectPath }}
