@@ -4,7 +4,7 @@
     <Nullable>disable</Nullable>
     <RootNamespace>Microsoft.FeatureManagement.Plus</RootNamespace>
     <OutputType>Exe</OutputType>
-    <Configurations>Debug;Release</Configurations>
+    <Configurations>Debug;Release;NugetPackage</Configurations>
     <Platforms>AnyCPU</Platforms>
     <LangVersion>8</LangVersion>
   </PropertyGroup>
