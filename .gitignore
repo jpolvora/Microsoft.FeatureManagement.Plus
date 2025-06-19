@@ -288,3 +288,4 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+/src/Microsoft.FeatureManagement.Plus/Microsoft.FeatureManagement.Plus.csproj.DotSettings

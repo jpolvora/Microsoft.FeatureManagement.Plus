@@ -14,59 +14,35 @@ namespace Microsoft.FeatureManagement.Plus
         public static async Task Main(string[] args)
         {
             HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+            //loading configuration from features.json
             builder.Configuration.AddJsonFile("features.json", optional: false, reloadOnChange: false);
-
             builder.Logging.AddConsole();
 
             IConfigurationRoot configuration = builder.Configuration;
             IServiceCollection services = builder.Services;
-
-            services.AddSingletonFeatureManagementPlus(configuration, options =>
-            {
-                options.TrackCacheItemEviction = true;
-
-            }).AddFeatureFilter<CustomFilter>();
-
+            services
+                .AddSingletonFeatureManagementPlus(configuration, options => { options.TrackCacheItemEviction = true; })
+                .AddFeatureFilter<CustomFilter>();
+            
             IHost host = builder.Build();
 
-            //FeatureManagementServices.SetServiceProvider(serviceProvider);
-
-            try
-            {
-                await host.StartAsync();
-                await RunExample(host.Services);
-                await host.StopAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            await host.StartAsync();
+            await RunExample(host.Services);
+            await host.StopAsync();
         }
 
         private static async Task RunExample(IServiceProvider provider)
         {
-            // var cfg = provider.GetService<IConfiguration>();
-            // var connectionStringName = cfg.GetValue<string>("FeatureManagementPlus:SqlFeatureDefinitionProvider:ConnectionStringName");
-            // var connectionString = cfg.GetConnectionString(connectionStringName);
-            // await using SqlConnection connection = new SqlConnection(connectionString);
-            // connection.Open(); // Open the connection
-            // var count = connection.ExecuteScalar<int>("select count(*) from features");
-            // if (count == 0)
-            // {
-            //     //const string insertSql = "insert into Features(Id, Description, Enabled, Filters, RequirementType) values(@Id, @Description, @Enabled, @Filters, @RequirementType);";
-            //
-            //     //var rowsAffected = await connection.ExecuteAsync(insertSql, new { Id = dbFeature.Id, Description = dbFeature.Description, Enabled = true, Filters = dbFeature.Filters, RequirementType = dbFeature.RequirementType });
-            // }
-
-
             var featureManager = provider.GetRequiredService<FeatureManager>();
+
+            //testing the feature manager on high concurrency demand
 
             var tasks = new List<Task>();
             for (int i = 0; i < 20; i++)
             {
                 tasks.Add(Loop(featureManager)); // Directly add the async method
             }
+
             await Task.WhenAll(tasks);
 
             Console.WriteLine("All tasks completed.");
