@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dapper;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,13 +23,11 @@ namespace Microsoft.FeatureManagement.Plus
 
             services.AddSingletonFeatureManagementPlus(configuration, options =>
             {
-                options.AddDebug = true;
-                options.EnableMemoryCache = true;
+                options.TrackCacheItemEviction = true;
 
             }).AddFeatureFilter<CustomFilter>();
 
             IHost host = builder.Build();
-            IServiceProvider serviceProvider = host.Services;
 
             //FeatureManagementServices.SetServiceProvider(serviceProvider);
 
@@ -50,19 +46,18 @@ namespace Microsoft.FeatureManagement.Plus
 
         private static async Task RunExample(IServiceProvider provider)
         {
-
-            var cfg = provider.GetService<IConfiguration>();
-            var connectionStringName = cfg.GetValue<string>("FeatureManagementPlus:SqlFeatureDefinitionProvider:ConnectionStringName");
-            var connectionString = cfg.GetConnectionString(connectionStringName);
-            await using SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open(); // Open the connection
-            var count = connection.ExecuteScalar<int>("select count(*) from features");
-            if (count == 0)
-            {
-                //const string insertSql = "insert into Features(Id, Description, Enabled, Filters, RequirementType) values(@Id, @Description, @Enabled, @Filters, @RequirementType);";
-
-                //var rowsAffected = await connection.ExecuteAsync(insertSql, new { Id = dbFeature.Id, Description = dbFeature.Description, Enabled = true, Filters = dbFeature.Filters, RequirementType = dbFeature.RequirementType });
-            }
+            // var cfg = provider.GetService<IConfiguration>();
+            // var connectionStringName = cfg.GetValue<string>("FeatureManagementPlus:SqlFeatureDefinitionProvider:ConnectionStringName");
+            // var connectionString = cfg.GetConnectionString(connectionStringName);
+            // await using SqlConnection connection = new SqlConnection(connectionString);
+            // connection.Open(); // Open the connection
+            // var count = connection.ExecuteScalar<int>("select count(*) from features");
+            // if (count == 0)
+            // {
+            //     //const string insertSql = "insert into Features(Id, Description, Enabled, Filters, RequirementType) values(@Id, @Description, @Enabled, @Filters, @RequirementType);";
+            //
+            //     //var rowsAffected = await connection.ExecuteAsync(insertSql, new { Id = dbFeature.Id, Description = dbFeature.Description, Enabled = true, Filters = dbFeature.Filters, RequirementType = dbFeature.RequirementType });
+            // }
 
 
             var featureManager = provider.GetRequiredService<FeatureManager>();

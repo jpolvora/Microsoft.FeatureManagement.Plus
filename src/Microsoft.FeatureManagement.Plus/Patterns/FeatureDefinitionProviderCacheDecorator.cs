@@ -10,13 +10,13 @@ using Microsoft.FeatureManagement.Plus.Options;
 
 namespace Microsoft.FeatureManagement.Plus.Patterns
 {
-    public sealed class FeatureDefinitionProviderCacheDecorator : IGenericDecorator<IFeatureDefinitionProvider>, IFeatureDefinitionProvider, ICacheObjects, IDisposable
+    public sealed class FeatureDefinitionProviderCacheDecorator : IGenericDecorator<IFeatureDefinitionProvider>, IFeatureDefinitionProvider, ICacheable, IDisposable
     {
         private readonly IMemoryCache _cache;
         private CancellationTokenSource _cacheResetTokenSource = new CancellationTokenSource();
         private readonly bool _shouldTrackCacheItemEviction;
         public IFeatureDefinitionProvider Target { get; }
-        public ILogger<ICacheObjects> Logger { get; }
+        public ILogger<ICacheable> Logger { get; }
 
         public FeatureDefinitionProviderCacheDecorator(IFeatureDefinitionProvider target, IMemoryCache cache, ILogger<FeatureDefinitionProviderCacheDecorator> logger, IOptions<FeatureManagementPlusOptions> options)
         {
@@ -36,7 +36,7 @@ namespace Microsoft.FeatureManagement.Plus.Patterns
             {
                 // No need to assign to a local variable
                 return await Target.GetFeatureDefinitionAsync(featureName).ConfigureAwait(false);
-            }, Logger, _shouldTrackCacheItemEviction ? _cacheResetTokenSource.Token : default);
+            }, Logger, _shouldTrackCacheItemEviction, _cacheResetTokenSource.Token);
         }
 
         public async IAsyncEnumerable<FeatureDefinition> GetAllFeatureDefinitionsAsync()
@@ -50,7 +50,7 @@ namespace Microsoft.FeatureManagement.Plus.Patterns
                     list.Add(feature);
                 }
                 return list;
-            }, Logger, _shouldTrackCacheItemEviction ? _cacheResetTokenSource.Token : default).ConfigureAwait(false);
+            }, Logger, _shouldTrackCacheItemEviction, _cacheResetTokenSource.Token).ConfigureAwait(false);
 
             foreach (var feature in features)
             {

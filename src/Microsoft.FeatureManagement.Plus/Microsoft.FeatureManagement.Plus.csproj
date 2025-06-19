@@ -40,19 +40,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Config\FeatureFlagsConfig.cs" />
     <Compile Remove="Services\FeatureManagementServices.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Config\FeatureFlagsConfig.cs" />
     <None Include="Services\FeatureManagementServices.cs" />
   </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' AND '$(TargetFramework)' != 'netstandard2.1'">
+    <PackageReference Include="Microsoft.Data.SqlClient" VersionOverride="5.2.3" />    
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="Microsoft.Data.SqlClient" VersionOverride="5.2.3" />    
+  </ItemGroup>
+  
   
   <ItemGroup>
-    <PackageReference Include="Dapper" />   
-        
-    <PackageReference Include="Microsoft.Data.SqlClient" />    
+    <PackageReference Include="Dapper" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />

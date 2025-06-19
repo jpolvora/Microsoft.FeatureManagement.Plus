@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -12,30 +14,26 @@ using Microsoft.FeatureManagement.Plus.Options;
 
 namespace Microsoft.FeatureManagement.Plus.Services
 {
-    public class SqlFeaturesDefinitionsService : IFeaturesDefinitionsService
+    [SuppressMessage("Performance", "CA1848:Use the LoggerMessage delegates")]
+    [SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities")]
+    public sealed class DbFeatureService : IFeatureService
     {
         private readonly string _connectionString;
-        private readonly ILogger<SqlFeaturesDefinitionsService> _logger;
+        private readonly ILogger<DbFeatureService> _logger;
         private readonly string _tableName;
 
-        public SqlFeaturesDefinitionsService(IConfiguration configuration, IOptions<FeatureManagementPlusOptions> options, ILogger<SqlFeaturesDefinitionsService> logger)
+        public DbFeatureService(IConfiguration configuration, IOptions<SqlFeatureDefinitionProviderOptions> options, ILogger<DbFeatureService> logger)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
+            SqlFeatureDefinitionProviderOptions sqlFeatureDefinitionProviderOptions = options != null
+                ? options.Value
+                : throw new ArgumentNullException(nameof(options));
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            var opts = options.Value?.SqlFeatureDefinitionProvider;
-            _tableName = !string.IsNullOrWhiteSpace(opts?.TableName) ? opts.TableName : "Features";
-            string connectionStringName = opts?.ConnectionStringName;
-            _connectionString = configuration.GetConnectionString(connectionStringName);
+            _tableName = !string.IsNullOrWhiteSpace(sqlFeatureDefinitionProviderOptions.TableName) ? sqlFeatureDefinitionProviderOptions.TableName : "Features";
+            _connectionString = configuration != null 
+                ? configuration.GetConnectionString(sqlFeatureDefinitionProviderOptions.ConnectionStringName) 
+                : throw new ArgumentNullException(nameof(configuration));
         }
 
         public async Task<FeatureDefinition> GetFeatureDefinitionAsync(string featureName)
@@ -45,7 +43,7 @@ namespace Microsoft.FeatureManagement.Plus.Services
                 throw new ArgumentNullException(nameof(featureName));
             }
 
-            _logger.LogTrace("Going to database looking up feature definition for feature {featureName}", featureName);
+            _logger.LogTrace("Going to database looking up feature definition for feature {FeatureName}", featureName);
 
             try
             {
@@ -58,10 +56,11 @@ namespace Microsoft.FeatureManagement.Plus.Services
                     {
                         if (await reader.ReadAsync().ConfigureAwait(false))
                         {
-                            return ConvertToFeatureDefinition(reader);
+                            return DbFeatureService.ConvertToFeatureDefinition(reader);
                         }
                     }
                 }
+
                 return null;
             }
             catch (Exception ex)
@@ -83,17 +82,17 @@ namespace Microsoft.FeatureManagement.Plus.Services
                 {
                     while (await reader.ReadAsync().ConfigureAwait(false))
                     {
-                        yield return ConvertToFeatureDefinition(reader);
+                        yield return DbFeatureService.ConvertToFeatureDefinition(reader);
                     }
                 }
             }
         }
 
-        private FeatureDefinition ConvertToFeatureDefinition(SqlDataReader reader)
+        private static FeatureDefinition ConvertToFeatureDefinition(SqlDataReader reader)
         {
             var id = reader["Id"]?.ToString();
-            var enabled = reader["Enabled"] != DBNull.Value && Convert.ToBoolean(reader["Enabled"]);
-            var requirementType = reader["RequirementType"] != DBNull.Value ? Convert.ToInt32(reader["RequirementType"]) : 0;
+            var enabled = reader["Enabled"] != DBNull.Value && Convert.ToBoolean(reader["Enabled"], CultureInfo.CurrentCulture);
+            var requirementType = reader["RequirementType"] != DBNull.Value ? Convert.ToInt32(reader["RequirementType"], CultureInfo.CurrentCulture) : 0;
 
             IFeatureEntity entity = new Feature(id)
             {

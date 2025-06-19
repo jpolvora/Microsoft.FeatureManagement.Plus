@@ -50,7 +50,7 @@ namespace Microsoft.FeatureManagement.Plus.Tests
         [Fact]
         public void Constructor_Throws_On_Null_Providers()
         {
-            Assert.Throws<ArgumentNullException>(() => new CompositeFeatureDefinitionProvider(null));
+            Assert.Throws<ArgumentNullException>(() => new CompositeFeatureDefinitionProvider([]));
         }
 
         [Fact]

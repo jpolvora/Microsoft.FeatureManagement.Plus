@@ -2,7 +2,7 @@
 
 namespace Microsoft.FeatureManagement.Plus.Patterns
 {
-    public interface ICacheObjects
+    public interface ICacheable
     {
         /// <summary>
         /// Expires all cache items.
@@ -10,6 +10,6 @@ namespace Microsoft.FeatureManagement.Plus.Patterns
         /// <returns></returns>
         void InvalidateCache();
 
-        ILogger<ICacheObjects> Logger { get; }
+        ILogger<ICacheable> Logger { get; }
     }
 }

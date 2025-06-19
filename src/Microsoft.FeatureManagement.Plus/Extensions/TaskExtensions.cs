@@ -8,6 +8,7 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
     {
         public static T RunSync<T>(this Func<CancellationToken, Task<T>> taskFactory, CancellationToken token)
         {
+            if (taskFactory == null) throw new ArgumentNullException(nameof(taskFactory));
             SynchronizationContext originalContext = SynchronizationContext.Current;
             SynchronizationContext.SetSynchronizationContext(null);
             try
@@ -22,6 +23,7 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
 
         public static T RunSync<T>(this Func<Task<T>> taskFactory)
         {
+            if (taskFactory == null) throw new ArgumentNullException(nameof(taskFactory));
             SynchronizationContext originalContext = SynchronizationContext.Current;
             SynchronizationContext.SetSynchronizationContext(null);
             try
@@ -37,6 +39,7 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
 
         public static void RunSync(this Func<CancellationToken, Task> taskFactory, CancellationToken token)
         {
+            if (taskFactory == null) throw new ArgumentNullException(nameof(taskFactory));
             SynchronizationContext originalContext = SynchronizationContext.Current;
             SynchronizationContext.SetSynchronizationContext(null);
             try
@@ -51,6 +54,7 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
 
         public static void RunSync(this Func<Task> taskFactory)
         {
+            if (taskFactory == null) throw new ArgumentNullException(nameof(taskFactory));
             SynchronizationContext originalContext = SynchronizationContext.Current;
             SynchronizationContext.SetSynchronizationContext(null);
             try

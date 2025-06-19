@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement.Plus.Services;
 
 namespace Microsoft.FeatureManagement.Plus.Patterns
 {
-    public class FeatureDefinitionProviderLoggerDecorator : IGenericDecorator<IFeatureDefinitionProvider>, IFeatureDefinitionProvider, IFeaturesDefinitionsService
+    [SuppressMessage("Performance", "CA1848:Use the LoggerMessage delegates")]
+    public class FeatureDefinitionProviderLoggerDecorator : IGenericDecorator<IFeatureDefinitionProvider>, IFeatureService
     {
         private readonly ILogger<FeatureDefinitionProviderLoggerDecorator> _logger;
 

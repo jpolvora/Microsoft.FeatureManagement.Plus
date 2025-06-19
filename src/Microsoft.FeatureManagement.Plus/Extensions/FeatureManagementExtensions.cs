@@ -7,9 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
@@ -17,41 +15,16 @@ using Microsoft.FeatureManagement.Plus.Entities;
 using Microsoft.FeatureManagement.Plus.FeatureDefinitionProviders;
 using Microsoft.FeatureManagement.Plus.Options;
 using Microsoft.FeatureManagement.Plus.Patterns;
-using Microsoft.FeatureManagement.Plus.Services;
 
 namespace Microsoft.FeatureManagement.Plus.Extensions
 {
     public static class FeatureManagementExtensions
     {
 
-        private static readonly Action<ILogger, Exception> _logCacheResetTriggered =
-            LoggerMessage.Define(
-                LogLevel.Information,
-                new EventId(0, nameof(LogCacheResetTriggered)),
-                "Cache reset triggered.");
-
-        private static readonly Action<ILogger, string, Exception> _logCacheMiss =
-           LoggerMessage.Define<string>(
-               LogLevel.Information,
-               new EventId(0, nameof(LogCacheMiss)),
-               "CacheMiss for key {Key}");
-
-        private static readonly Action<ILogger, string, Exception> _logCacheHit =
-         LoggerMessage.Define<string>(
-             LogLevel.Information,
-             new EventId(0, nameof(LogCacheHit)),
-             "CacheHit for key {Key}");
-
-        private static readonly Action<ILogger, string, string, Exception> _logCacheEntryEviction =
-            LoggerMessage.Define<string, string>(
-          LogLevel.Information,
-          new EventId(0, nameof(LogCacheEviction)),
-          "Cache item {Key} removed due to {Reason}");
-
-
         private static readonly char[] Separator = new[] { ',' };
 
-        public static IFeatureDefinitionProvider WithMemoryCache(this IFeatureDefinitionProvider target, bool enabled, IServiceProvider sp) => enabled
+        public static IFeatureDefinitionProvider WithMemoryCache(this IFeatureDefinitionProvider target, IServiceProvider sp, bool enabled)
+            => enabled
             ? new FeatureDefinitionProviderCacheDecorator(
                 target,
                 sp.GetRequiredService<IMemoryCache>(),
@@ -59,11 +32,13 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
                 sp.GetRequiredService<IOptions<FeatureManagementPlusOptions>>())
             : target;
 
-        public static T WithLogging<T>(this T target, IServiceProvider sp)
-            where T : class, IFeatureDefinitionProvider
-            => new FeatureDefinitionProviderLoggerDecorator(
+        public static IFeatureDefinitionProvider WithLogging(this IFeatureDefinitionProvider target, IServiceProvider sp, bool enabled)
+            => enabled ?
+            new FeatureDefinitionProviderLoggerDecorator(
                 target,
-                sp.GetRequiredService<ILogger<FeatureDefinitionProviderLoggerDecorator>>()).As<T>();
+                sp.GetRequiredService<ILogger<FeatureDefinitionProviderLoggerDecorator>>())
+            : target;
+
 
 
         public static T As<T>(this object instance)
@@ -171,9 +146,9 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
 
             foreach (IFeatureFilterMetadata filter in featureManager.FeatureFilters.ToArray())
             {
-                if (typeof(ICacheObjects).IsAssignableFrom(filter.GetType()))
+                if (typeof(ICacheable).IsAssignableFrom(filter.GetType()))
                 {
-                    ((ICacheObjects)filter).InvalidateCache();
+                    ((ICacheable)filter).InvalidateCache();
                 }
             }
         }
@@ -182,7 +157,7 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
         {
             while (true)
             {
-                if (provider is ICacheObjects manager)
+                if (provider is ICacheable manager)
                 {
                     manager.InvalidateCache();
                 }
@@ -200,15 +175,16 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
             return Task.CompletedTask;
         }
 
-        public static async Task<T> ExecuteWithCache<T>(this IMemoryCache cache, string cacheKey, Func<ICacheEntry, Task<T>> factory, ILogger logger, Nullable<CancellationToken> token = null)
+        public static async Task<T> ExecuteWithCache<T>(this IMemoryCache cache, string cacheKey, Func<ICacheEntry, Task<T>> factory, ILogger logger, bool trackCacheItems, CancellationToken token)
         {
             bool cacheMiss = false;
             T result = await cache.GetOrCreateAsync(cacheKey, entry =>
             {
                 cacheMiss = true;
-                if (token != null && token.HasValue)
+                if (trackCacheItems)
                 {
-                    TrackCacheEntry(entry, logger, token.Value);
+                    entry.AddExpirationToken(new CancellationChangeToken(token))
+                    .RegisterPostEvictionCallback(CreateCacheItemRemovedCallback(logger));
                 }
 
                 return factory(entry);
@@ -217,52 +193,22 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
 
             if (cacheMiss)
             {
-                LogCacheMiss(logger, cacheKey);
+                LoggerDelegates.LogCacheMiss(logger, cacheKey);
             }
             else
             {
-                LogCacheHit(logger, cacheKey);
+                LoggerDelegates.LogCacheHit(logger, cacheKey);
             }
 
             return result;
         }
 
-        private static void LogCacheMiss(ILogger logger, string cacheKey)
-        {
-            if (logger != null && logger.IsEnabled(LogLevel.Debug))
-            {
-                _logCacheMiss(logger, cacheKey, null);
-            }
-        }
-
-        private static void LogCacheHit(ILogger logger, string cacheKey)
-        {
-            if (logger != null && logger.IsEnabled(LogLevel.Debug))
-            {
-                _logCacheHit(logger, cacheKey, null);
-            }
-        }
-
-
-        private static void LogCacheEviction(ILogger logger, string cacheKey, string reason)
-        {
-            if (logger != null && logger.IsEnabled(LogLevel.Debug))
-            {
-                _logCacheEntryEviction(logger, cacheKey, reason, null);
-            }
-        }
-
-        private static void TrackCacheEntry(ICacheEntry entry, ILogger logger, CancellationToken token)
-            => entry.AddExpirationToken(new CancellationChangeToken(token))
-                .RegisterPostEvictionCallback(CreateCacheItemRemovedCallback(logger));
-
-
         private static PostEvictionDelegate CreateCacheItemRemovedCallback(ILogger logger)
         {
-            return (key, value, reason, state) => LogCacheEviction(logger, key.ToString(), reason.ToString());
+            return (key, value, reason, state) => LoggerDelegates.LogCacheEviction(logger, key.ToString(), reason.ToString());
         }
 
-        public static void TriggerTokenCancellation(this ICacheObjects instance, ref CancellationTokenSource cacheResetTokenSource)
+        public static void TriggerTokenCancellation(this ICacheable instance, ref CancellationTokenSource cacheResetTokenSource)
         {
             if (instance == null)
             {
@@ -274,67 +220,7 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
                 tokenSource.Cancel();
             }
 
-            LogCacheResetTriggered(instance.Logger);
-        }
-
-
-
-
-        public static void LogCacheResetTriggered(ILogger logger)
-        {
-            if (logger != null && logger.IsEnabled(LogLevel.Information))
-            {
-                _logCacheResetTriggered(logger, null);
-            }
-        }
-
-        public static IFeatureManagementBuilder AddSingletonFeatureManagementPlus(this IServiceCollection services, IConfiguration configuration, Action<FeatureManagementPlusOptions> configureOptions = null)
-        {
-
-            services.AddOptions<FeatureManagementPlusOptions>()
-                .BindConfiguration(FeatureManagementPlusOptions.SectionName)
-                .Configure(configureOptions ??= options =>
-                {
-                    options.AddDebug = false;
-                    options.SqlFeatureDefinitionProvider.ConnectionStringName = "DefaultConnection"; // Default connection string name
-                    options.SqlFeatureDefinitionProvider.TableName = "Features";
-                });
-
-            services.AddLogging(lb =>
-            {
-                var addDebug = configuration.GetValue<bool>(FeatureManagementPlusOptions.AddDebugKey);
-                if (addDebug)
-                {
-                    lb.AddDebug();
-                }
-                lb.SetMinimumLevel(LogLevel.Trace);
-            });
-
-            services.AddMemoryCache();
-            services.TryAddSingleton<ConfigurationFeatureDefinitionProvider>();
-            services.AddOptions<FeatureManagementOptions>()
-                .Configure(options =>
-            {
-                options.IgnoreMissingFeatureFilters = true; // Ignore missing feature filters
-                options.IgnoreMissingFeatures = true; // Ignore missing features
-            });
-            return services
-                .AddSingleton<SqlFeaturesDefinitionsService>()
-                .AddSingleton<IFeaturesDefinitionsService>(sp => sp.GetRequiredService<SqlFeaturesDefinitionsService>().WithLogging<IFeaturesDefinitionsService>(sp))
-                .AddSingleton<DelegatingFeatureDefinitionProvider<IFeaturesDefinitionsService>>()
-                .RemoveAll<IFeatureDefinitionProvider>()
-                .AddSingleton<IFeatureDefinitionProvider>(sp =>
-                new CompositeFeatureDefinitionProvider(new IFeatureDefinitionProvider[]
-                {
-                    sp.GetRequiredService<ConfigurationFeatureDefinitionProvider>(),
-                    sp
-                    .GetRequiredService<DelegatingFeatureDefinitionProvider<IFeaturesDefinitionsService>>()
-                    .WithMemoryCache(configuration.GetValue<bool>(FeatureManagementPlusOptions.EnableMemoryCacheKey), sp)
-                    .WithLogging(sp)
-                }))
-                .AddFeatureManagement();
-
-
+            LoggerDelegates.LogCacheResetTriggered(instance.Logger);
         }
     }
 }

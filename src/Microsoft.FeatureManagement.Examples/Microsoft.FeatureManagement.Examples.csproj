@@ -25,7 +25,6 @@
     <PackageReference Include="Microsoft.FeatureManagement" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.FeatureManagement.Plus.Tests\Microsoft.FeatureManagement.Plus.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.FeatureManagement.Plus\Microsoft.FeatureManagement.Plus.csproj" />
   </ItemGroup>
   <ItemGroup>
