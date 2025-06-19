@@ -1,0 +1,59 @@
+- name: '.NET Build Publish NuGet GitHub Package'
+  description: '.NET CI Workflow with NuGet publishing to GitHub packages.'
+  branding:
+    icon: 'arrow-up-circle'
+    color: 'blue'
+
+  inputs:
+  projectPath:
+    description: '.NET project to build. Passed from the caller workflow'
+    required: true
+    type: string
+    default: '*'
+  packagesToken:
+    description: 'Personal access token with permissions: (delete:packages, repo, write:packages). Passed from the caller workflow'
+    required: true
+    type: string
+    default: '*'
+  githubToken:
+    description: 'use github token'
+    required: true
+    type: string
+    default: '*'
+    
+# outputs:
+#   random-number:
+#     description: "Random number"
+#     value: ${{ steps.random-number-generator.outputs.random-number }}
+
+  runs:
+    using: "composite"
+    steps:
+      - uses: actions/checkout@v3.5.2
+      - uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
+        id: get-version
+        with:
+          proj-path: ${{ inputs.projectPath }}
+      - uses: actions/setup-dotnet@v3.0.3
+        with:
+          dotnet-version: 5.0.x
+        env:
+          NUGET_AUTH_TOKEN: ${{inputs.githubToken}}
+        # - name: Build
+      - run: | 
+          dotnet nuget add source "https://nuget.pkg.github.com/${{github.repository_owner}}/index.json" --name "github" --username ${{ github.actor }} --password ${{ inputs.packagesToken }} --store-password-in-clear-text
+          dotnet build --configuration Release
+          dotnet pack ${{inputs.projectPath}} --output nuget-packages --configuration Release
+          dotnet nuget push **/*.nupkg --skip-duplicate -s "https://nuget.pkg.github.com/${{github.repository_owner}}/index.json"
+          shell: bash
+      - uses: actions/github-script@v6.4.1
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/NuGet_${{steps.get-version.outputs.version}}',
+              sha: context.sha
+          })
+      
+  
