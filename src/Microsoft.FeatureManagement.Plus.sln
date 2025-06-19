@@ -15,7 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rootfiles", "rootfiles", "{
 		..\.gitignore = ..\.gitignore
 		Directory.Packages.props = Directory.Packages.props
 		qodana.yaml = qodana.yaml
-		README.md = README.md
+		..\README.md = ..\README.md
+		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"

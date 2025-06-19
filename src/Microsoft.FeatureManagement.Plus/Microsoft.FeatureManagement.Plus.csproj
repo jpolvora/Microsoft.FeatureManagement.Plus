@@ -1,111 +1,115 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <NoWin32Manifest>true</NoWin32Manifest>
-    <Configurations>Debug;Release;NugetPackage</Configurations>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>8</LangVersion>
-    <Nullable>disable</Nullable>
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <UserSecretsId>42a1809b-ca58-4b9a-b907-0ededa2f151e</UserSecretsId>
-    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-    <EnableNETAnalyzers>True</EnableNETAnalyzers>
-    <AnalysisLevel>6.0-all</AnalysisLevel>
-    <Platforms>AnyCPU</Platforms>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Title>FeatureManagement extras for Microsoft.FeatureManagement</Title>
-    <Authors>Jone Polvora    </Authors>
-    <Description>Enhancements and improvements for Microsoft.FeatureManagement, like multi-source aggregate FeatureDefinitions, Custom SQL Database source for Features, Caching, Logging, Reloading </Description>
-    <PackageProjectUrl>https://github.com/jpolvora/Microsoft.FeatureManagement.Plus</PackageProjectUrl>    
-    <RepositoryUrl>https://github.com/jpolvora/Microsoft.FeatureManagement.Plus</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>featureflags, microsoft-feature-management-dotnet, CompositeFeatureDefinitionProvider</PackageTags>
-    <PackageReleaseNotes>initial</PackageReleaseNotes>
-    <AssemblyVersion>0.0.1</AssemblyVersion>
-    <FileVersion>0.0.1</FileVersion>
-    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <IncludeSymbols>True</IncludeSymbols>
-  </PropertyGroup>
-  <!-- Optionally, add conditional properties for each configuration -->
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <WarningLevel>1</WarningLevel>
-  </PropertyGroup>  
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-    <WarningLevel>3</WarningLevel>
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
-    <WarningLevel>3</WarningLevel>
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'NugetPackage' ">
-    <Optimize>true</Optimize>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <DocumentationFile>bin\NugetPackage\Microsoft.FeatureManagement.Plus.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
-    <WarningLevel>1</WarningLevel>
-    <DebugType>embedded</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
-    <WarningLevel>1</WarningLevel>
-    <DebugType>embedded</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='NugetPackage|netstandard2.0|AnyCPU'">
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='NugetPackage|netstandard2.1|AnyCPU'">
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
+    <PropertyGroup>
+        <NoWin32Manifest>true</NoWin32Manifest>
+        <Configurations>Debug;Release;NugetPackage</Configurations>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <LangVersion>8</LangVersion>
+        <Nullable>disable</Nullable>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <UserSecretsId>42a1809b-ca58-4b9a-b907-0ededa2f151e</UserSecretsId>
+        <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+        <EnableNETAnalyzers>True</EnableNETAnalyzers>
+        <AnalysisLevel>6.0-all</AnalysisLevel>
+        <Platforms>AnyCPU</Platforms>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>FeatureManagement extras for Microsoft.FeatureManagement</Title>
+        <Authors>Jone Polvora</Authors>
+        <Description>Enhancements and improvements for Microsoft.FeatureManagement, like multi-source aggregate FeatureDefinitions, Custom SQL Database source for Features, Caching, Logging, Reloading</Description>
+        <PackageProjectUrl>https://github.com/jpolvora/Microsoft.FeatureManagement.Plus</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/jpolvora/Microsoft.FeatureManagement.Plus</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>featureflags, microsoft-feature-management-dotnet, CompositeFeatureDefinitionProvider</PackageTags>
+        <PackageReleaseNotes>initial</PackageReleaseNotes>
+        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <FileVersion>0.0.1</FileVersion>
+        <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <IncludeSymbols>True</IncludeSymbols>
+        <Version>0.0.1</Version>
+    </PropertyGroup>
+    <!-- Optionally, add conditional properties for each configuration -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <WarningLevel>1</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+        <WarningLevel>3</WarningLevel>
+        <DebugType>none</DebugType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
+        <WarningLevel>3</WarningLevel>
+        <DebugType>none</DebugType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>1701;1702</NoWarn>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <NoWarn>1701;1702</NoWarn>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'NugetPackage' ">
+        <Optimize>true</Optimize>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <DocumentationFile>bin\NugetPackage\Microsoft.FeatureManagement.Plus.xml</DocumentationFile>
+        <NoWarn>;NU1507;CS1591</NoWarn>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+        <WarningLevel>1</WarningLevel>
+        <DebugType>embedded</DebugType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
+        <WarningLevel>1</WarningLevel>
+        <DebugType>embedded</DebugType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='NugetPackage|netstandard2.0|AnyCPU'">
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='NugetPackage|netstandard2.1|AnyCPU'">
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
-  </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Services\FeatureManagementServices.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="Services\FeatureManagementServices.cs"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="Services\FeatureManagementServices.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="Services\FeatureManagementServices.cs"/>
+    </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' AND '$(TargetFramework)' != 'netstandard2.1'">
-    <PackageReference Include="Microsoft.Data.SqlClient" VersionOverride="5.2.3" />    
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'">
-    <PackageReference Include="Microsoft.Data.SqlClient" VersionOverride="5.2.3" />    
-  </ItemGroup>
-  
-  
-  <ItemGroup>
-    <PackageReference Include="Dapper" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
-    <PackageReference Include="Microsoft.FeatureManagement" />
-    <PackageReference Include="System.Linq.Async" />
-  </ItemGroup>
-  
-  
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup> 
+    <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' AND '$(TargetFramework)' != 'netstandard2.1'">
+        <PackageReference Include="Microsoft.Data.SqlClient" VersionOverride="5.2.3"/>
+    </ItemGroup>
+    <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'">
+        <PackageReference Include="Microsoft.Data.SqlClient" VersionOverride="5.2.3"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Configuration"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug"/>
+        <PackageReference Include="Microsoft.FeatureManagement"/>
+        <PackageReference Include="System.Linq.Async"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <Folder Include="Properties\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
 
 </Project>
