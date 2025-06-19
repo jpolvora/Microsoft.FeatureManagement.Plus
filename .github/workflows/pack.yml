@@ -55,7 +55,7 @@ jobs:
 
       - name: Add GitHub NuGet source
         run: |
-          dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --name "github" --username "${{ github.actor }}" --password "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
+          dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --store-password-in-clear-text --name "github" --username "${{ github.actor }}" --password "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
         shell: bash
 
       - name: Clean output directory
@@ -67,7 +67,7 @@ jobs:
         shell: bash
 
       - name: Push to GitHub Packages
-        run: dotnet nuget push nuget-packages/*.nupkg --skip-duplicate --no-symbols -s "github" --api-key "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
+        run: dotnet nuget push nuget-packages/*.nupkg --skip-duplicate --no-symbols -s "github" --api-key "${{ secrets.PERSONAL_ACCESS_TOKEN }}" --store-password-in-clear-text
         shell: bash
 
       - uses: actions/github-script@v6.4.1
