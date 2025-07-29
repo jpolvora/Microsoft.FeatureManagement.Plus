@@ -1,6 +1,6 @@
 # Microsoft.FeatureManagement.Plus
 
-**FeatureManagement.Plus** is a C# library that extends Microsoft.FeatureManagement library, with robust result/error handling, flexible feature definition providers, caching, and integrated logging support.
+**FeatureManagement.Plus** is a C# library that extends [Microsoft.FeatureManagement](https://github.com/microsoft/FeatureManagement-Dotnet) library, with robust result/error handling, flexible feature definition providers, caching, and integrated logging support.
 
 ## Features
 - **CompositeFeatureDefinitionProvider**  
