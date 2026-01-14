@@ -1,0 +1,61 @@
+{
+  "$schema": "https://github.com/microsoft/FeatureManagement/raw/main/Schema/FeatureManagement.v2.0.0.schema.json",
+  "feature_flags": [],
+  "feature_management": {
+    "feature_flags": [
+      {
+        "id": "BooleanTrue",
+        "description": "A feature flag with no Filters, that returns true.",
+        "enabled": true,
+        "conditions": {
+          "client_filters": [
+            {
+              "name": "volatile"
+            }
+          ]
+        }
+      },
+      {
+        "id": "BooleanFalse",
+        "description": "A feature flag with no Filters, that returns false.",
+        "enabled": false,
+        "conditions": {
+          "client_filters": [
+            {
+              "name": "volatile"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Minimal",
+        "enabled": true,
+        "client_filters": [
+          {
+            "name": "volatile"
+          }
+        ]
+      },
+      {
+        "id": "NoEnabled",
+        "client_filters": [
+          {
+            "name": "volatile"
+          }
+        ]
+      },
+      {
+        "id": "EmptyConditions",
+        "description": "A feature flag with no values in conditions, that returns true.",
+        "enabled": true,
+        "conditions": {
+          "client_filters": [
+            {
+              "name": "volatile"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

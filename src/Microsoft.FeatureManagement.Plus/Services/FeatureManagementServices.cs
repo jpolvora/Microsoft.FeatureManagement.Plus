@@ -7,6 +7,8 @@ namespace Microsoft.FeatureManagement.Plus.Services
 
     public static class FeatureManagementServices
     {
+        private static readonly object _lock = new object();
+
         public static T Get<T>()
         {
             return Cache<T>.Instance();
@@ -60,8 +62,11 @@ namespace Microsoft.FeatureManagement.Plus.Services
 
         public static IServiceProvider SetServiceProvider(IServiceProvider serviceProvider)
         {
-            Cache<IServiceProvider>.Lazy = new Lazy<IServiceProvider>(() => serviceProvider);
-            return serviceProvider;
+            lock (_lock)
+            {
+                Cache<IServiceProvider>.Lazy = new Lazy<IServiceProvider>(() => serviceProvider);
+                return serviceProvider;
+            }
         }
 
         private static class Cache<T>

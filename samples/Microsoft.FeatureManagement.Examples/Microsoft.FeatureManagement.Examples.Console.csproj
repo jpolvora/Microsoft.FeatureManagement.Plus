@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>        
+    <Nullable>disable</Nullable>
+    <RootNamespace>Microsoft.FeatureManagement.Plus</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Configurations>Debug;Release;NugetPackage</Configurations>
+    <Platforms>AnyCPU</Platforms>
+    <LangVersion>8</LangVersion>
+    <UserSecretsId>4cc81b05-31a1-4332-99f6-e8426b106805</UserSecretsId>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugType>full</DebugType>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>portable</DebugType>
+    <IsPublishable>False</IsPublishable>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <IsPublishable>False</IsPublishable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseNugetPackage)' == 'true'">
+    <PackageReference Include="Microsoft.FeatureManagement.Plus" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.FeatureManagement.Plus.Db\Microsoft.FeatureManagement.Plus.Db.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.FeatureManagement.Plus\Microsoft.FeatureManagement.Plus.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="features.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

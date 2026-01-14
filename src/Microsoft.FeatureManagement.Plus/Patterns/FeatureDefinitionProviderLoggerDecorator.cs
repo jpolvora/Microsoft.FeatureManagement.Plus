@@ -50,9 +50,36 @@ namespace Microsoft.FeatureManagement.Plus.Patterns
                 throw;
             }
 
-            await foreach (var feature in features.ConfigureAwait(false))
+            var enumerator = features.GetAsyncEnumerator();
+            try
             {
-                yield return feature;
+                bool hasNext = true;
+                while (hasNext)
+                {
+                    FeatureDefinition feature = null;
+                    try
+                    {
+                        hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
+                        if (hasNext)
+                        {
+                            feature = enumerator.Current;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error enumerating feature definitions");
+                        throw;
+                    }
+
+                    if (feature != null)
+                    {
+                        yield return feature;
+                    }
+                }
+            }
+            finally
+            {
+                await enumerator.DisposeAsync().ConfigureAwait(false);
             }
         }
     }

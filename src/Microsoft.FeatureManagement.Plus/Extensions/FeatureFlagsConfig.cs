@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,6 +25,7 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
         public static IFeatureManagementBuilder AddSingletonFeatureManagementPlus(
             this IServiceCollection services,
             IConfiguration configuration,
+            Func<IServiceProvider, IFeatureService> featureServiceFactory,
             Action<FeatureManagementPlusOptions> configureOptions = null)
         {
             if (services == null)
@@ -51,10 +53,9 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
                     options.IgnoreMissingFeatureFilters = true;
                     options.IgnoreMissingFeatures = false;
                 });
-
+            
             return services
-                .AddSingleton<DbFeatureService>()
-                .AddSingleton<IFeatureService>(sp => sp.GetRequiredService<DbFeatureService>().WithLogging(sp, true).As<IFeatureService>())
+                .AddSingleton<IFeatureService>(sp => featureServiceFactory(sp))
                 .AddSingleton<DelegatingFeatureDefinitionProvider<IFeatureService>>()
                 .RemoveAll<IFeatureDefinitionProvider>()
                 .AddSingleton<IFeatureDefinitionProvider>(sp =>
@@ -64,15 +65,13 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
                         sp.GetRequiredService<DelegatingFeatureDefinitionProvider<IFeatureService>>()
                             .WithMemoryCache(sp, configuration.GetValue<bool>(FeatureManagementPlusOptions.EnableMemoryCacheKey))
                             .WithLogging(sp, configuration.GetValue<bool>(FeatureManagementPlusOptions.EnableLoggingKey))
-                    }))
+                    }, sp.GetService<ILogger<CompositeFeatureDefinitionProvider>>()))
                 .AddFeatureManagement();
         }
 
         private static void DefaultConfigureOptions(FeatureManagementPlusOptions options)
         {
-            options.AddDebug = false;
-            options.SqlFeatureDefinitionProvider.ConnectionStringName = "DefaultConnection";
-            options.SqlFeatureDefinitionProvider.TableName = "Features";
+            options.AddDebug = false;            
         }
 
         private static void ConfigureLogging(IServiceCollection services, IConfiguration configuration)

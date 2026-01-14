@@ -63,5 +63,46 @@ namespace Microsoft.FeatureManagement.Plus.Extensions
           "Cache item {Key} removed due to {Reason}");
 
 
+        private static readonly Action<ILogger, string, Exception> LogFeatureDefinitionLookupDelegate =
+            LoggerMessage.Define<string>(
+                LogLevel.Trace,
+                new EventId(100, nameof(LogFeatureDefinitionLookup)),
+                "Going to database looking up feature definition for feature {FeatureName}");
+
+        private static readonly Action<ILogger, string, Exception> LogFeatureDefinitionErrorDelegate =
+            LoggerMessage.Define<string>(
+                LogLevel.Error,
+                new EventId(101, nameof(LogFeatureDefinitionError)),
+                "Error retrieving feature definition {FeatureName} from database");
+
+        private static readonly Action<ILogger, Exception> LogFetchingAllFeaturesDelegate =
+            LoggerMessage.Define(
+                LogLevel.Trace,
+                new EventId(102, nameof(LogFetchingAllFeatures)),
+                "Fetching all feature definitions from database");
+
+        public static void LogFeatureDefinitionLookup(ILogger logger, string featureName)
+        {
+             if (logger.IsEnabled(LogLevel.Trace))
+             {
+                 LogFeatureDefinitionLookupDelegate(logger, featureName, null);
+             }
+        }
+
+        public static void LogFeatureDefinitionError(ILogger logger, Exception ex, string featureName)
+        {
+             if (logger.IsEnabled(LogLevel.Error))
+             {
+                 LogFeatureDefinitionErrorDelegate(logger, featureName, ex);
+             }
+        }
+
+        public static void LogFetchingAllFeatures(ILogger logger)
+        {
+             if (logger.IsEnabled(LogLevel.Trace))
+             {
+                 LogFetchingAllFeaturesDelegate(logger, null);
+             }
+        }
     }
 }
